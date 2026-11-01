@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p class="eyebrow">Archives</p>
+    <h1>Scan history</h1>
+  </div>
+  <input class="search" id="history-search" placeholder="Filter by target IP">
+</header>
+<section class="glass-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Target</th><th>Range</th><th>Open</th><th>Closed</th><th>Duration</th><th>Timestamp</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="history-body"></tbody>
+    </table>
+  </div>
+</section>
+<div class="modal" id="detail-modal" hidden>
+  <div class="glass-card modal-card">
+    <div class="card-head">
+      <h3 id="detail-title">Scan detail</h3>
+      <button class="btn ghost" id="close-detail" type="button">Close</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Port</th><th>State</th><th>Service</th></tr></thead>
+        <tbody id="detail-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadHistory() {
+  const q = document.getElementById("history-search").value;
+  const data = await Sentinel.api("/api/history?q=" + encodeURIComponent(q));
+  const body = document.getElementById("history-body");
+  if (!data.scans.length) {
+    body.innerHTML = '<tr><td colspan="7" class="muted">No matching scans.</td></tr>';
+    return;
+  }
+  body.innerHTML = data.scans.map(s => `
+    <tr>
+      <td>${s.target_ip}</td>
+      <td>${s.start_port}–${s.end_port}</td>
+      <td class="ok">${s.open_count}</td>
+      <td>${s.closed_count}</td>
+      <td>${Sentinel.fmtDuration(s.duration_ms)}</td>
+      <td>${Sentinel.fmtTime(s.created_at)}</td>
+      <td class="row-actions">
+        <button data-view="${s.id}">Details</button>
+        <a href="/api/history/${s.id}/csv">CSV</a>
+        <button class="danger" data-del="${s.id}">Delete</button>
+      </td>
+    </tr>`).join("");
+}
+document.getElementById("history-search").addEventListener("input", Sentinel.debounce(loadHistory, 250));
+document.getElementById("history-body").addEventListener("click", async (e) => {
+  const view = e.target.dataset.view;
+  const del = e.target.dataset.del;
+  if (view) {
+    const data = await Sentinel.api("/api/history/" + view);
+    document.getElementById("detail-title").textContent = data.scan.target_ip + " · " + data.scan.start_port + "–" + data.scan.end_port;
+    document.getElementById("detail-body").innerHTML = data.scan.results.map(r =>
+      `<tr><td>${r.port}</td><td class="${r.state}">${r.state}</td><td>${r.service}</td></tr>`).join("");
+    document.getElementById("detail-modal").hidden = false;
+  }
+  if (del && confirm("Delete this scan record?")) {
+    await Sentinel.api("/api/history/" + del, { method: "DELETE" });
+    loadHistory();
+  }
+});
+document.getElementById("close-detail").onclick = () => document.getElementById("detail-modal").hidden = true;
+loadHistory();
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Access{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block content %}
+<section class="auth-shell">
+  <div class="auth-copy">
+    <p class="eyebrow">Advanced Network Security & Intelligence</p>
+    <h1>SENTINEL</h1>
+    <p>Private-range TCP reconnaissance for authorized campus and lab environments. Localhost and RFC1918 targets only.</p>
+    <ul class="auth-points">
+      <li>Live SOC telemetry</li>
+      <li>Authorized TCP connect scans</li>
+      <li>Encrypted operator sessions</li>
+    </ul>
+  </div>
+  <form class="glass-card auth-card" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <h2>Operator login</h2>
+    <label>Username or email {{ form.identifier(placeholder="analyst or analyst@lab.local") }}</label>
+    <label class="password-field">Password
+      <input id="password" name="password" type="password" required>
+      <button type="button" class="toggle-pass" data-target="password">Show</button>
+    </label>
+    <label class="checkline">{{ form.remember() }} Remember this workstation</label>
+    <button class="btn primary" type="submit">Enter SOC</button>
+    <p class="auth-switch">No clearance yet? <a href="{{ url_for('register') }}">Create an operator account</a></p>
+  </form>
+</section>
+{% endblock %}

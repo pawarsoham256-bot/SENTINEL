@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Enroll{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block content %}
+<section class="auth-shell">
+  <div class="auth-copy">
+    <p class="eyebrow">Operator enrollment</p>
+    <h1>Join SENTINEL</h1>
+    <p>Register a private analyst identity. Passwords are hashed. Public internet scanning is blocked at the engine.</p>
+  </div>
+  <form class="glass-card auth-card" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <h2>Create account</h2>
+    <label>Full name {{ form.full_name(placeholder="Alex Rivera") }}</label>
+    {% for e in form.full_name.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    <label>Username {{ form.username(placeholder="arivera") }}</label>
+    {% for e in form.username.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    <label>Email {{ form.email(placeholder="alex@lab.local") }}</label>
+    {% for e in form.email.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    <label class="password-field">Password
+      {{ form.password(id="password") }}
+      <button type="button" class="toggle-pass" data-target="password">Show</button>
+    </label>
+    <div class="strength" data-strength-for="password"><span></span><em>Strength</em></div>
+    {% for e in form.password.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    <label class="password-field">Confirm password
+      {{ form.confirm(id="confirm") }}
+      <button type="button" class="toggle-pass" data-target="confirm">Show</button>
+    </label>
+    {% for e in form.confirm.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    <button class="btn primary" type="submit">Provision access</button>
+    <p class="auth-switch">Already enrolled? <a href="{{ url_for('login') }}">Sign in</a></p>
+  </form>
+</section>
+{% endblock %}

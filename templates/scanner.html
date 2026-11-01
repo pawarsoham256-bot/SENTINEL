@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Scanner{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p class="eyebrow">TCP connect engine</p>
+    <h1>Network scanner</h1>
+  </div>
+</header>
+<section class="scanner-layout">
+  <form id="scan-form" class="glass-card scan-form">
+    {{ form.hidden_tag() }}
+    <h3>Authorized target</h3>
+    <label>IPv4 address {{ form.target_ip(placeholder="127.0.0.1", value="127.0.0.1") }}</label>
+    <div class="split">
+      <label>Start port {{ form.start_port(value=1) }}</label>
+      <label>End port {{ form.end_port(value=1024) }}</label>
+    </div>
+    <label class="checkline auth-box">
+      {{ form.authorized() }}
+      I confirm I am authorized to scan this host. SENTINEL only accepts localhost and private IPv4 addresses.
+    </label>
+    <p class="muted">TCP connect tests only. Public IPs, stealth scans, and exploitation are blocked.</p>
+    <button class="btn primary" type="submit" id="scan-start">Launch scan</button>
+    <div id="form-errors" class="form-errors"></div>
+  </form>
+  <article class="glass-card scan-stage" id="scan-stage">
+    <div class="radar large" id="radar">
+      <div class="ring"></div>
+      <div class="ring delay"></div>
+      <div class="ring delay-2"></div>
+      <div class="beam"></div>
+      <div class="core"></div>
+    </div>
+    <div class="scan-meta">
+      <h3 id="scan-status">Standby</h3>
+      <p id="scan-detail">Awaiting authorized target.</p>
+      <div class="progress"><span id="progress-bar"></span></div>
+      <div class="scan-stats">
+        <span>Progress <strong id="scan-percent">0%</strong></span>
+        <span>Elapsed <strong id="scan-elapsed">0.00s</strong></span>
+        <span>Port <strong id="scan-port">—</strong></span>
+      </div>
+    </div>
+  </article>
+</section>
+<section class="glass-card">
+  <div class="card-head">
+    <h3>Results</h3>
+    <button class="btn ghost" id="export-csv" type="button" disabled>Export CSV</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Port</th><th>State</th><th>Service</th></tr></thead>
+      <tbody id="results-body">
+        <tr><td colspan="3" class="muted">Launch a scan to populate this table.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+{% endblock %}

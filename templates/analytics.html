@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p class="eyebrow">Intelligence</p>
+    <h1>{{ page_title }}</h1>
+  </div>
+  <a class="btn primary" href="{{ url_for('api_reports_csv') }}">Download CSV report</a>
+</header>
+<section class="stat-grid">
+  <article class="glass-card stat"><small>Recorded scans</small><strong id="a-scans">0</strong></article>
+  <article class="glass-card stat"><small>Unique hosts</small><strong id="a-hosts">0</strong></article>
+  <article class="glass-card stat"><small>Total duration</small><strong id="a-duration">0s</strong></article>
+  <article class="glass-card stat"><small>Open findings</small><strong id="a-open">0</strong></article>
+</section>
+<section class="dash-grid">
+  <article class="glass-card"><h3>Scan volume</h3><canvas id="trendChart" height="180"></canvas></article>
+  <article class="glass-card"><h3>Port states</h3><canvas id="portChart" height="180"></canvas></article>
+  <article class="glass-card"><h3>Open services</h3><canvas id="serviceChart" height="180"></canvas></article>
+  <article class="glass-card"><h3>Hosts by open ports</h3><canvas id="hostChart" height="180"></canvas></article>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const neon = "#3ee0ff";
+const green = "#3dff9a";
+Sentinel.api("/api/analytics").then((data) => {
+  document.getElementById("a-scans").textContent = data.totals.scans;
+  document.getElementById("a-hosts").textContent = data.totals.hosts;
+  document.getElementById("a-duration").textContent = Sentinel.fmtDuration(data.totals.duration_ms);
+  document.getElementById("a-open").textContent = data.ports.open;
+  Sentinel.lineChart("trendChart", data.trend.labels, data.trend.scans, neon);
+  Sentinel.doughnut("portChart", ["Open", "Closed"], [data.ports.open, data.ports.closed], [green, "#ff4d6d"]);
+  Sentinel.barChart("serviceChart", data.services.labels, data.services.values, neon);
+  Sentinel.barChart("hostChart", data.hosts.labels, data.hosts.values, green);
+});
+</script>
+{% endblock %}
